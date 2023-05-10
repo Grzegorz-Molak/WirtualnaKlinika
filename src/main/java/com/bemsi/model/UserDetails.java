@@ -18,7 +18,7 @@ import java.util.List;
 @Table (name = "user_details")
 public class UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_details_id")
     private Long id;
 
@@ -37,9 +37,4 @@ public class UserDetails {
     private LocalDate birthDate;
     private int role; //binary
 
-    @OneToMany(mappedBy = "doctor")
-    private List<Appointment> doctors = new ArrayList<>();
-
-    @OneToMany(mappedBy = "patient")
-    private List<Appointment> patients = new ArrayList<>();
 }
