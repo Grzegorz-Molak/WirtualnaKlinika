@@ -1,8 +1,7 @@
 package com.bemsi.controller;
 
 import com.bemsi.model.Appointment;
-import com.bemsi.model.User;
-import com.bemsi.repository.AppointmentRepository;
+import com.bemsi.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +14,10 @@ import java.util.List;
 public class AppointmentController {
 
     @Autowired
-    private AppointmentRepository appointmentRepository;
+    private AppointmentService appointmentService;
 
-    @GetMapping
-    public List<Appointment> getAllAppointments(){
-        return appointmentRepository.findAll();
-    }
+    //@GetMapping
+    //public List<Appointment> getAllAppointments(){
+      //  return appointmentRepository.findAll();
+    //}
 }

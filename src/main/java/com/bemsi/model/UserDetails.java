@@ -24,7 +24,7 @@ public class UserDetails {
 
     @OneToOne
     @JoinColumn(name = "specialization_id", nullable = true)
-    private Specialization specializations;
+    private Specialization specialization;
 
     @OneToOne
     @JoinColumn(name="user_id",nullable = false)
