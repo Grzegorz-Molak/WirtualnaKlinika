@@ -6,15 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserDetailsDto {
 
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String specialization;
-    private LocalDate birthDate;
-    private int role; //binary
+public record UserDetailsDto(String firstName,
+        String lastName,
+        String email,
+        String specialization,
+        LocalDate birthDate,
+        int role){
+
 }

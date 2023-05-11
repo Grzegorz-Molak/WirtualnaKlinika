@@ -41,18 +41,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto signUp(UserDetailsDto userDetailsDto) {
-        Specialization specialization = specializationRepository.findByName(userDetailsDto.getSpecialization());
-        if(specialization == null && (userDetailsDto.getRole() & 2) == 2){
+        Specialization specialization = specializationRepository.findByName(userDetailsDto.specialization());
+        if(specialization == null && (userDetailsDto.role() & 2) == 2){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Zły lekarz");
         } //TODO Gdzie to powinno być i czy tak to robić
-        if(specialization != null && (userDetailsDto.getRole() % 2) == 0){
+        if(specialization != null && (userDetailsDto.role() & 2) == 0){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem");
         }
+        Random randomGen = new Random();
+        long random_id;
+        do{
+           random_id = randomGen.nextInt(9999999);
+        }while(userDetailsRepository.findById(random_id).isPresent());
 
-        String login = userDetailsDto.getFirstName().charAt(0) +
-                userDetailsDto.getLastName().substring(0, 4); //Co jeżeli nazwisko jest krótsze od 4 liter
+
+        String login = String.format("%07d", random_id);
 
         int STRING_LENGTH = 6;
         String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -67,7 +72,7 @@ public class UserServiceImpl implements UserService {
         User user = new User(login, password.toString(), true);
         userRepository.save(user);
 
-        UserDetails userDetails = new UserDetails(user.getId(), specialization, userDetailsDto);
+        UserDetails userDetails = new UserDetails(random_id, specialization, userDetailsDto);
         userDetailsRepository.save(userDetails);
         return userMapper.toUserDto(user);
 

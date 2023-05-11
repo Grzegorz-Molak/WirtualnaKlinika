@@ -22,7 +22,7 @@ import java.util.List;
 public class UserDetails {
     @Id
     @Column(name = "user_details_id")
-    private Long id;
+    private long id;
 
     @OneToOne
     @JoinColumn(name = "specialization_id", nullable = true)
@@ -35,13 +35,13 @@ public class UserDetails {
     private LocalDate birthDate;
     private int role; //binary
 
-    public UserDetails(Long id, Specialization specialization, UserDetailsDto userDetailsDto){
+    public UserDetails(long id, Specialization specialization, UserDetailsDto userDetailsDto){
         this.id = id;
         this.specialization = specialization;
-        this.email = userDetailsDto.getEmail();
-        this.firstName = userDetailsDto.getFirstName();
-        this.lastName = userDetailsDto.getLastName();
-        this.birthDate =  userDetailsDto.getBirthDate();
-        this.role = userDetailsDto.getRole();
+        this.email = userDetailsDto.email();
+        this.firstName = userDetailsDto.firstName();
+        this.lastName = userDetailsDto.lastName();
+        this.birthDate =  userDetailsDto.birthDate();
+        this.role = userDetailsDto.role();
     }
 }
