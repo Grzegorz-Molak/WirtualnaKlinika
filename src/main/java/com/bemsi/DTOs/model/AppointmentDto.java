@@ -1,4 +1,6 @@
 package com.bemsi.DTOs.model;
 
-public class AppointmentDto {
+import java.time.LocalDateTime;
+
+public record AppointmentDto(long id, UserDetailsDto doctor, UserDetailsDto patient, LocalDateTime datetime, String note) {
 }

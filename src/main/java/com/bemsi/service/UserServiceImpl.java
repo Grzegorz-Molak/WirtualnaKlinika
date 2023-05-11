@@ -25,17 +25,18 @@ public class UserServiceImpl implements UserService {
     private final UserDetailsRepository userDetailsRepository;
     private final SpecializationRepository specializationRepository;
     private final JdbcTemplate jdbcTemplate;
-    private final UserMapper userMapper;
+
+    private final LoginPasswordGenerator loginPasswordGenerator;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserDetailsRepository userDetailsRepository,
                            SpecializationRepository specializationRepository, JdbcTemplate jdbcTemplate,
-                           UserMapper userMapper){
+                           LoginPasswordGenerator loginPasswordGenerator){
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.specializationRepository = specializationRepository;
         this.jdbcTemplate = jdbcTemplate;
-        this.userMapper = userMapper;
+        this.loginPasswordGenerator = loginPasswordGenerator;
     }
 
 
@@ -50,31 +51,16 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem");
         }
-        Random randomGen = new Random();
-        long random_id;
-        do{
-           random_id = randomGen.nextInt(9999999);
-        }while(userDetailsRepository.findById(random_id).isPresent());
 
+        String login = loginPasswordGenerator.generateLogin();
+        String password = loginPasswordGenerator.generatePassword();
 
-        String login = String.format("%07d", random_id);
-
-        int STRING_LENGTH = 6;
-        String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-
-        StringBuilder password = new StringBuilder(STRING_LENGTH);
-        for (int i = 0; i < STRING_LENGTH; i++) {
-            int randomIndex = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(randomIndex);
-            password.append(randomChar);
-        }
-        User user = new User(login, password.toString(), true);
+        User user = new User(login, password, true);
         userRepository.save(user);
 
-        UserDetails userDetails = new UserDetails(random_id, specialization, userDetailsDto);
+        UserDetails userDetails = new UserDetails(Integer.parseInt(login), specialization, userDetailsDto);
         userDetailsRepository.save(userDetails);
-        return userMapper.toUserDto(user);
+        return UserMapper.toUserDto(user);
 
 
     }

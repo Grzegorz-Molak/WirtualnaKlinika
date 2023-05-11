@@ -1,5 +1,6 @@
 package com.bemsi.controller;
 
+import com.bemsi.DTOs.model.AppointmentDto;
 import com.bemsi.model.Appointment;
 import com.bemsi.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ public class AppointmentController {
     }
 
 
-    //@GetMapping
-    //public List<Appointment> getAllAppointments(){
-      //  return appointmentRepository.findAll();
-    //}
+    @GetMapping
+    public List<AppointmentDto> getAllAppointments() {
+        return appointmentService.findAll();
+    }
 }
