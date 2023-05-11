@@ -14,7 +14,12 @@ public class UserMapper {
     }
 
     public static UserDetailsDto toUserDetailsDto (UserDetails userDetails){
-        return new UserDetailsDto(userDetails.getFirstName(),userDetails.getLastName(),
-                userDetails.getEmail(),userDetails.getSpecialization().getName(),userDetails.getBirthDate(),userDetails.getRole());
+        return new UserDetailsDto(
+                userDetails.getFirstName(),
+                userDetails.getLastName(),
+                userDetails.getEmail(),
+                ((userDetails.getRole() & 2) == 2 ? userDetails.getSpecialization().getName() : null),
+                userDetails.getBirthDate(),
+                userDetails.getRole());
     }
 }
