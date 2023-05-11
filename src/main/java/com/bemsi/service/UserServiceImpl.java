@@ -4,6 +4,7 @@ import com.bemsi.DTOs.mapper.UserMapper;
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
 import com.bemsi.model.User;
+import com.bemsi.model.UserDetails;
 import com.bemsi.repository.SpecializationRepository;
 import com.bemsi.repository.UserDetailsRepository;
 import com.bemsi.repository.UserRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -59,6 +61,20 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserDto(user);
 
 
+    }
+
+
+    //TODO Usunąć poniższe z prdukcji!!! tylko do testowania
+    @Override
+    public List<UserDto> findAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(UserMapper::toUserDto).toList();
+    }
+
+    @Override
+    public List<UserDetailsDto> findAllDetails() {
+        List<UserDetails> userDetails = userDetailsRepository.findAll();
+        return userDetails.stream().map(UserMapper::toUserDetailsDto).toList();
     }
 
 }
