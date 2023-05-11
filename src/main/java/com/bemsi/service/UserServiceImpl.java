@@ -3,14 +3,17 @@ package com.bemsi.service;
 import com.bemsi.DTOs.mapper.UserMapper;
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
+import com.bemsi.model.Specialization;
 import com.bemsi.model.User;
 import com.bemsi.model.UserDetails;
 import com.bemsi.repository.SpecializationRepository;
 import com.bemsi.repository.UserDetailsRepository;
 import com.bemsi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Random;
@@ -38,8 +41,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto signUp(UserDetailsDto userDetailsDto) {
-        String login = userDetailsDto.getFirstName().substring(0, 1) +
-                userDetailsDto.getLastName().substring(0, 4);
+        Specialization specialization = specializationRepository.findByName(userDetailsDto.getSpecialization());
+        if(specialization == null && (userDetailsDto.getRole() & 2) == 2){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Zły lekarz");
+        }
+
+        String login = userDetailsDto.getFirstName().charAt(0) +
+                userDetailsDto.getLastName().substring(0, 4); //Co jeżeli nazwisko jest krótsze od 4 liter
 
         int STRING_LENGTH = 6;
         String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -51,13 +60,11 @@ public class UserServiceImpl implements UserService {
             char randomChar = CHARACTERS.charAt(randomIndex);
             password.append(randomChar);
         }
-        User user = new User();
-        user.setLogin(login);
-        user.setActive(true);
-        user.setPassword(password.toString());
-
+        User user = new User(login, password.toString(), true);
         userRepository.save(user);
 
+        UserDetails userDetails = new UserDetails(user, specialization, userDetailsDto);
+        userDetailsRepository.save(userDetails);
         return userMapper.toUserDto(user);
 
 
