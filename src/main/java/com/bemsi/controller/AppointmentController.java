@@ -13,8 +13,13 @@ import java.util.List;
 @RequestMapping("/appointment")
 public class AppointmentController {
 
+    private final AppointmentService appointmentService;
+
     @Autowired
-    private AppointmentService appointmentService;
+    public AppointmentController(AppointmentService appointmentService){
+        this.appointmentService = appointmentService;
+    }
+
 
     //@GetMapping
     //public List<Appointment> getAllAppointments(){

@@ -16,20 +16,22 @@ import java.util.Random;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserDetailsRepository userDetailsRepository;
+    private final SpecializationRepository specializationRepository;
+    private final JdbcTemplate jdbcTemplate;
+    private final UserMapper userMapper;
 
     @Autowired
-    private UserDetailsRepository userDetailsRepository;
-
-    @Autowired
-    private SpecializationRepository specializationRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private UserMapper userMapper;
+    public UserServiceImpl(UserRepository userRepository, UserDetailsRepository userDetailsRepository,
+                           SpecializationRepository specializationRepository, JdbcTemplate jdbcTemplate,
+                           UserMapper userMapper){
+        this.userRepository = userRepository;
+        this.userDetailsRepository = userDetailsRepository;
+        this.specializationRepository = specializationRepository;
+        this.jdbcTemplate = jdbcTemplate;
+        this.userMapper = userMapper;
+    }
 
 
     @Override

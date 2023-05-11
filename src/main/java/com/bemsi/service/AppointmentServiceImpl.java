@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppointmentServiceImpl implements AppointmentService{
 
+    private final AppointmentRepository appointmentRepository;
     @Autowired
-    private AppointmentRepository appointmentRepository;
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository){
+        this.appointmentRepository = appointmentRepository;
+    }
+
 }
