@@ -45,6 +45,10 @@ public class UserServiceImpl implements UserService {
         if(specialization == null && (userDetailsDto.getRole() & 2) == 2){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Zły lekarz");
+        } //TODO Gdzie to powinno być i czy tak to robić
+        if(specialization != null && (userDetailsDto.getRole() % 2) == 0){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem");
         }
 
         String login = userDetailsDto.getFirstName().charAt(0) +
@@ -63,7 +67,7 @@ public class UserServiceImpl implements UserService {
         User user = new User(login, password.toString(), true);
         userRepository.save(user);
 
-        UserDetails userDetails = new UserDetails(user, specialization, userDetailsDto);
+        UserDetails userDetails = new UserDetails(user.getId(), specialization, userDetailsDto);
         userDetailsRepository.save(userDetails);
         return userMapper.toUserDto(user);
 

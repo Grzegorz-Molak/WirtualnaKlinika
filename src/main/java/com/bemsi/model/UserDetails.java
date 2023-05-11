@@ -28,10 +28,6 @@ public class UserDetails {
     @JoinColumn(name = "specialization_id", nullable = true)
     private Specialization specialization;
 
-    @OneToOne
-    @JoinColumn(name="user_id",nullable = false)
-    private User user_id;
-
     private String email;
     private String firstName;
     private String lastName;
@@ -39,10 +35,9 @@ public class UserDetails {
     private LocalDate birthDate;
     private int role; //binary
 
-    public UserDetails(User user, Specialization specialization, UserDetailsDto userDetailsDto){
-        this.id = user.getId();
+    public UserDetails(Long id, Specialization specialization, UserDetailsDto userDetailsDto){
+        this.id = id;
         this.specialization = specialization;
-        this.user_id = user;
         this.email = userDetailsDto.getEmail();
         this.firstName = userDetailsDto.getFirstName();
         this.lastName = userDetailsDto.getLastName();
