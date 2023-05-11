@@ -21,7 +21,7 @@ public class LoginPasswordGenerator {
         long random_id;
         do{
             random_id = random.nextInt(9999999);
-        }while(userDetailsRepository.findById(random_id).isPresent());
+        }while(userDetailsRepository.existsById(random_id));
         return String.format("%07d", random_id);
     }
 
