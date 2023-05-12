@@ -42,6 +42,11 @@ public class UserController {
         return userService.findAllDetails();
     }
 
+    @GetMapping("/doctors")
+    private List<UserDetailsDto> allDoctorsDetails(){
+        return userService.findAllDoctors();
+    }
+
 
 }
 

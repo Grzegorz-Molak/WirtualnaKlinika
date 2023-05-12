@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
         if(specialization == null && (userDetailsDto.role() & 2) == 2){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Zły lekarz");
-        } //TODO Gdzie to powinno być i czy tak to robić
+        } //TODO Gdzie to powinno być i czy tak to robić // ja bym to robiła wcześniej w kontrolerze
         if(specialization != null && (userDetailsDto.role() & 2) == 0){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem");
@@ -76,6 +76,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDetailsDto> findAllDetails() {
         List<UserDetails> userDetails = userDetailsRepository.findAll();
+        return userDetails.stream().map(UserMapper::toUserDetailsDto).toList();
+    }
+
+    @Override
+    public List<UserDetailsDto> findAllDoctors() {
+        List<UserDetails> userDetails = userDetailsRepository.findAllDoctors();
         return userDetails.stream().map(UserMapper::toUserDetailsDto).toList();
     }
 

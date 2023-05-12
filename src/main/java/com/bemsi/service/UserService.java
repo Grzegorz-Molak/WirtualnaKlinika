@@ -11,5 +11,7 @@ public interface UserService {
     //TODO Usunąć poniższe z prdukcji!!! tylko do testowania
     List<UserDto> findAllUsers();
     List<UserDetailsDto> findAllDetails();
- //   void logIn();
+
+    List<UserDetailsDto> findAllDoctors();
+    //   void logIn();
 }

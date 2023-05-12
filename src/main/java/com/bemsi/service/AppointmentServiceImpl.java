@@ -1,9 +1,7 @@
 package com.bemsi.service;
 
 import com.bemsi.DTOs.mapper.AppointmentMapper;
-import com.bemsi.DTOs.mapper.UserMapper;
 import com.bemsi.DTOs.model.AppointmentDto;
-import com.bemsi.model.Appointment;
 import com.bemsi.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
