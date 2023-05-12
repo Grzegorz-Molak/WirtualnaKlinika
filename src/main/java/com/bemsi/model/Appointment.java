@@ -28,7 +28,13 @@ public class Appointment {
     @JoinColumn(name = "patient_id", referencedColumnName = "user_details_id")
     private UserDetails patient;
 
-    private LocalDateTime datetime;
+    private LocalDateTime startTime;
     private String note;
+
+    public Appointment(UserDetails doctor , LocalDateTime startTime){
+        this.doctor = doctor;
+        this.startTime = startTime;
+
+    }
 
 }

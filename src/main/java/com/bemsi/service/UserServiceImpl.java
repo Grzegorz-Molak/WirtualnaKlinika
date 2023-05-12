@@ -62,7 +62,6 @@ public class UserServiceImpl implements UserService {
         userDetailsRepository.save(userDetails);
         return UserMapper.toUserDto(user);
 
-
     }
 
 

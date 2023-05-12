@@ -8,7 +8,7 @@ public class AppointmentMapper {
         return new AppointmentDto(appointment.getId(),
                 UserMapper.toUserDetailsDto(appointment.getDoctor()),
                 UserMapper.toUserDetailsDto(appointment.getPatient()),
-                appointment.getDatetime(),
+                appointment.getStartTime(),
                 appointment.getNote());
     }
 }

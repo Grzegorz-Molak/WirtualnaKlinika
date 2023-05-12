@@ -3,10 +3,7 @@ package com.bemsi.model;
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.repository.SpecializationRepository;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
