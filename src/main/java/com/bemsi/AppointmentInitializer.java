@@ -1,11 +1,15 @@
 package com.bemsi;
 
 import com.bemsi.model.Appointment;
+import com.bemsi.model.User;
 import com.bemsi.model.UserDetails;
+import com.bemsi.repository.AppointmentRepository;
+import com.bemsi.repository.UserDetailsRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +25,11 @@ public class AppointmentInitializer implements CommandLineRunner {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    AppointmentRepository appointmentRepository;
+    @Autowired
+    UserDetailsRepository userDetailsRepository;
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {
@@ -33,23 +42,14 @@ public class AppointmentInitializer implements CommandLineRunner {
             }
             currentDate = currentDate.plusDays(1);
         }
-
-        Query query = entityManager.createNativeQuery("SELECT * FROM user_details u WHERE (u.role & 2) = 2", UserDetails.class);
-        List<UserDetails> doctors = query.getResultList();
-
+        List<UserDetails> doctors =userDetailsRepository.findAllDoctors();
         for (UserDetails doctor : doctors) {
             for (LocalDate date : dates) {
                 LocalDateTime startTime = date.atTime(9, 0);
                 LocalDateTime endTime = date.atTime(15, 0);
                 while (startTime.isBefore(endTime)) {
-                    Query query2 = entityManager.createNativeQuery(
-                            "SELECT * FROM appointments WHERE doctor_id = :doctor_id AND start_time = :startTime", Appointment.class);
-                    query2.setParameter("doctor_id", doctor.getId());
-                    query2.setParameter("startTime", startTime);
-                    List<Appointment> appointments = query2.getResultList();
-                    if(appointments.isEmpty()) {
-                        Appointment appointment = new Appointment(doctor, startTime);
-                        entityManager.persist(appointment);
+                    if(!appointmentRepository.existsByDoctorAndStartTime(doctor, startTime)){
+                        appointmentRepository.save(new Appointment(doctor, startTime));
                     }
                     startTime = startTime.plusMinutes(30); // Increment by half an hour
                 }

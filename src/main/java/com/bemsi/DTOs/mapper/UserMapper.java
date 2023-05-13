@@ -14,6 +14,7 @@ public class UserMapper {
     }
 
     public static UserDetailsDto toUserDetailsDto (UserDetails userDetails){
+        if(userDetails == null) return null;
         return new UserDetailsDto(
                 userDetails.getFirstName(),
                 userDetails.getLastName(),
