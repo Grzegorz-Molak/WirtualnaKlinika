@@ -9,6 +9,7 @@ import com.bemsi.model.UserDetails;
 import com.bemsi.repository.SpecializationRepository;
 import com.bemsi.repository.UserDetailsRepository;
 import com.bemsi.repository.UserRepository;
+import com.bemsi.security.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -28,15 +30,18 @@ public class UserServiceImpl implements UserService {
 
     private final LoginPasswordGenerator loginPasswordGenerator;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserDetailsRepository userDetailsRepository,
                            SpecializationRepository specializationRepository, JdbcTemplate jdbcTemplate,
-                           LoginPasswordGenerator loginPasswordGenerator){
+                           LoginPasswordGenerator loginPasswordGenerator, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.specializationRepository = specializationRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.loginPasswordGenerator = loginPasswordGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -62,6 +67,14 @@ public class UserServiceImpl implements UserService {
         userDetailsRepository.save(userDetails);
         return UserMapper.toUserDto(user);
 
+    }
+
+    @Override
+    public UserDetailsDto findUserDetailsByLogin(String login){
+        return userDetailsRepository
+                .findById(Long.parseLong(login)).
+                map(UserMapper::toUserDetailsDto).
+                orElse(null);
     }
 
 
