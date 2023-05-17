@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface UserService {
 
-
+    String logIn(UserDto userDto);
     UserDto signUp(UserDetailsDto userDetailsDto);
 
     //TODO nwm czy usuwać

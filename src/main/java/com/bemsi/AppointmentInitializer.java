@@ -36,7 +36,7 @@ public class AppointmentInitializer implements CommandLineRunner {
 
         List<LocalDate> dates = new ArrayList<>();
         LocalDate currentDate = LocalDate.now().plusDays(1); // Start from tomorrow
-        while (dates.size() < 30) {
+        while (dates.size() < 3) {
             if (currentDate.getDayOfWeek() != DayOfWeek.SATURDAY && currentDate.getDayOfWeek() != DayOfWeek.SUNDAY) {
                 dates.add(currentDate);
             }
@@ -46,7 +46,7 @@ public class AppointmentInitializer implements CommandLineRunner {
         for (UserDetails doctor : doctors) {
             for (LocalDate date : dates) {
                 LocalDateTime startTime = date.atTime(9, 0);
-                LocalDateTime endTime = date.atTime(15, 0);
+                LocalDateTime endTime = date.atTime(12, 0);
                 while (startTime.isBefore(endTime)) {
                     if(!appointmentRepository.existsByDoctorAndStartTime(doctor, startTime)){
                         appointmentRepository.save(new Appointment(doctor, startTime));

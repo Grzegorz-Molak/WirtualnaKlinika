@@ -9,6 +9,7 @@ import com.bemsi.model.UserDetails;
 import com.bemsi.repository.SpecializationRepository;
 import com.bemsi.repository.UserDetailsRepository;
 import com.bemsi.repository.UserRepository;
+import com.bemsi.security.JwtService;
 import com.bemsi.security.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,24 +27,38 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserDetailsRepository userDetailsRepository;
     private final SpecializationRepository specializationRepository;
-    private final JdbcTemplate jdbcTemplate;
-
     private final LoginPasswordGenerator loginPasswordGenerator;
 
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtService jwtService;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserDetailsRepository userDetailsRepository,
                            SpecializationRepository specializationRepository, JdbcTemplate jdbcTemplate,
-                           LoginPasswordGenerator loginPasswordGenerator, PasswordEncoder passwordEncoder){
+                           LoginPasswordGenerator loginPasswordGenerator, PasswordEncoder passwordEncoder,
+                           JwtService jwtService){
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.specializationRepository = specializationRepository;
-        this.jdbcTemplate = jdbcTemplate;
         this.loginPasswordGenerator = loginPasswordGenerator;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
+
+    @Override
+    public String logIn(UserDto userDto) {
+        System.out.println(userDto);
+        boolean isSuccess = passwordEncoder
+                .validatePassword(
+                        userDto.password(),
+                        userRepository.findByLogin(userDto.login()).getPassword());
+        if(isSuccess){
+            return jwtService.generateJws(userDto.login());
+        }
+        return "Nieudane logowanie";
+    }
 
     @Override
     public UserDto signUp(UserDetailsDto userDetailsDto) {
@@ -71,6 +86,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetailsDto findUserDetailsByLogin(String login){
+        System.out.println(login);
         return userDetailsRepository
                 .findById(Long.parseLong(login)).
                 map(UserMapper::toUserDetailsDto).

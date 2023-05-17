@@ -28,7 +28,7 @@ public class JwtService {
     }
 
     public String generateJws(String login) {
-        final int MINUTES = 5;
+        final int MINUTES = 1;
         return Jwts.builder()
                 .setSubject(login)
                 .setExpiration(DateUtils.addMinutes(new Date(), MINUTES))

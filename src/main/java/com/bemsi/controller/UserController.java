@@ -31,11 +31,9 @@ public class UserController {
         return userService.signUp(userDetailsDto);
     }
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     private String logIn(@RequestBody UserDto userDto){
-
-        //userService.logIn();
-        return null;
+        return userService.logIn(userDto);
     }
 
     //TODO Usunąć poniższe z prdukcji!!! tylko do testowania
