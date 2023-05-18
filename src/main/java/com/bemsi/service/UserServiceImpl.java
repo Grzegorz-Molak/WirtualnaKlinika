@@ -3,23 +3,25 @@ package com.bemsi.service;
 import com.bemsi.DTOs.mapper.UserMapper;
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
+
 import com.bemsi.model.Specialization;
 import com.bemsi.model.User;
 import com.bemsi.model.UserDetails;
+
 import com.bemsi.repository.SpecializationRepository;
 import com.bemsi.repository.UserDetailsRepository;
 import com.bemsi.repository.UserRepository;
+
 import com.bemsi.security.JwtService;
+import com.bemsi.security.LoginPasswordGenerator;
 import com.bemsi.security.PasswordEncoder;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
 @Service
 public class UserServiceImpl implements UserService {

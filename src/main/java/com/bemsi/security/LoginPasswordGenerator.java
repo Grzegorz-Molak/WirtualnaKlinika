@@ -1,4 +1,4 @@
-package com.bemsi.service;
+package com.bemsi.security;
 
 import com.bemsi.repository.UserDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
