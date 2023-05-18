@@ -1,8 +1,7 @@
 # Virtual Clinic
 
-bemsi porject
+bemsi project
 
-## Installation
 ### Docker 
 ```
 docker pull mysql
