@@ -20,7 +20,7 @@ public class AppointmentController {
 
     @PostMapping("/{appointment_id}/{user_login}")
     public String  makeAppointment(@PathVariable long appointment_id,
-                                   @PathVariable long user_login){
+                                   @PathVariable String user_login){
 
         return appointmentService.makeAppointment(appointment_id,user_login);
     }

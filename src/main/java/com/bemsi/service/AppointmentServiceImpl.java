@@ -30,13 +30,13 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public String makeAppointment(long appointment_id, long user_login) {
+    public String makeAppointment(long appointment_id, String user_login) {
         Appointment appointment = appointmentRepository.findById(appointment_id);
         if (appointment == null){
             return "Nie ma wizyty z tym id";
         }
 
-        Optional<UserDetails> userDetails = userDetailsRepository.findById(user_login);
+        Optional<UserDetails> userDetails = userDetailsRepository.findById(Long.parseLong(user_login));
 
         if(!userDetails.isPresent()){
             return "nie ma takiego pacjenta";

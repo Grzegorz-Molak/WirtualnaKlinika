@@ -11,5 +11,5 @@ public interface AppointmentService {
 
     List<AppointmentDto> findAll();
 
-    String makeAppointment(long appointment_id, long user_login);
+    String makeAppointment(long appointment_id, String  user_login);
 }
