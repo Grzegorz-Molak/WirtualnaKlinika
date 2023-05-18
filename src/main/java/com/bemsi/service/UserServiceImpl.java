@@ -27,17 +27,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserDetailsRepository userDetailsRepository;
     private final SpecializationRepository specializationRepository;
+
     private final LoginPasswordGenerator loginPasswordGenerator;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserDetailsRepository userDetailsRepository,
-                           SpecializationRepository specializationRepository, JdbcTemplate jdbcTemplate,
-                           LoginPasswordGenerator loginPasswordGenerator, PasswordEncoder passwordEncoder,
-                           JwtService jwtService){
+                           SpecializationRepository specializationRepository, LoginPasswordGenerator loginPasswordGenerator,
+                           PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.specializationRepository = specializationRepository;
@@ -49,43 +47,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String logIn(UserDto userDto) {
-        System.out.println(userDto);
-        boolean isSuccess = passwordEncoder
-                .validatePassword(
-                        userDto.password(),
-                        userRepository.findByLogin(userDto.login()).getPassword());
-        if(isSuccess){
+
+        boolean isSuccess = passwordEncoder.validatePassword(
+                userDto.password(), userRepository.findByLogin(userDto.login()).getPassword());
+
+        if (isSuccess) {
             return jwtService.generateJws(userDto.login());
         }
-        return "Nieudane logowanie";
+
+        return "Podano niepoprawne dane";
     }
 
     @Override
     public UserDto signUp(UserDetailsDto userDetailsDto) {
+
         Specialization specialization = specializationRepository.findByName(userDetailsDto.specialization());
-        if(specialization == null && (userDetailsDto.role() & 2) == 2){
+        if (specialization == null && (userDetailsDto.role() & 2) == 2) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Zły lekarz");
-        } //TODO Gdzie to powinno być i czy tak to robić // ja bym to robiła wcześniej w kontrolerze
-        if(specialization != null && (userDetailsDto.role() & 2) == 0){
+                    HttpStatus.BAD_REQUEST, "Nie ma takiej specjalizacji");
+        }
+
+        if (specialization != null && (userDetailsDto.role() & 2) == 0) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem");
+                    HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem, więc nie może mieć specjalizacji");
         }
 
         String login = loginPasswordGenerator.generateLogin();
         String password = loginPasswordGenerator.generatePassword();
-
-        User user = new User(login, password, true);
+        String hash = passwordEncoder.createHash(password);
+        User user = new User(login, hash, true);
         userRepository.save(user);
-
         UserDetails userDetails = new UserDetails(Integer.parseInt(login), specialization, userDetailsDto);
         userDetailsRepository.save(userDetails);
-        return UserMapper.toUserDto(user);
+
+        User user1 = new User(login, password, true);
+
+        return UserMapper.toUserDto(user1);
 
     }
 
     @Override
-    public UserDetailsDto findUserDetailsByLogin(String login){
+    public UserDetailsDto findUserDetailsByLogin(String login) {
         System.out.println(login);
         return userDetailsRepository
                 .findById(Long.parseLong(login)).

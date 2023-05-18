@@ -12,18 +12,21 @@ import java.security.spec.InvalidKeySpecException;
 @Component
 public class PasswordEncoder {
 
-    public String createHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public String createHash(String password) {
+        try {
+            int iterations = 1000;
+            char[] chars = password.toCharArray();
+            byte[] salt = getSalt();
 
-        int iterations = 1000;
-        char[] chars = password.toCharArray();
-        byte[] salt = getSalt();
+            PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
-        PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            byte[] hash = factory.generateSecret(spec).getEncoded();
 
-        byte[] hash =factory.generateSecret(spec).getEncoded();
-
-        return  iterations + ":" + toHex(salt) + ":" + toHex(hash);
+            return iterations + ":" + toHex(salt) + ":" + toHex(hash);
+        } catch(InvalidKeySpecException | NoSuchAlgorithmException ex){
+            return null;
+        }
     }
 
     private byte[] getSalt() throws NoSuchAlgorithmException

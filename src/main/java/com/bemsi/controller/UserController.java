@@ -2,11 +2,8 @@ package com.bemsi.controller;
 
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
-import com.bemsi.model.User;
-import com.bemsi.model.UserDetails;
 import com.bemsi.security.JwtService;
 import com.bemsi.service.UserService;
-import io.jsonwebtoken.Jwt;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +28,12 @@ public class UserController {
         return userService.signUp(userDetailsDto);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     private String logIn(@RequestBody UserDto userDto){
         return userService.logIn(userDto);
     }
+
+
 
     //TODO Usunąć poniższe z prdukcji!!! tylko do testowania
     @GetMapping("")
