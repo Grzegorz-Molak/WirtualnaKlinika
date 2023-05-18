@@ -101,7 +101,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetailsDto findUserDetailsByLogin(String login) {
-        System.out.println(login);
         return userDetailsRepository
                 .findById(Long.parseLong(login)).
                 map(UserMapper::toUserDetailsDto).

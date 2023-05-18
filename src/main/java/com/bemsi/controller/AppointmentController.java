@@ -18,14 +18,18 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
+    @PostMapping("/{appointment_id}/{user_login}")
+    public String  makeAppointment(@PathVariable long appointment_id,
+                                   @PathVariable long user_login){
+
+        return appointmentService.makeAppointment(appointment_id,user_login);
+    }
+
 
     @GetMapping
     public List<AppointmentDto> getAllAppointments() {
         return appointmentService.findAll();
     }
 
-    //@PostMapping("/{id}")
-    //public String  makeAppointment(@RequestParam long appointment_id){
-    //    return "Appointment booked";
-    //}
+
 }
