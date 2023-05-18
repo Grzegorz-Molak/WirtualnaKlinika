@@ -12,10 +12,14 @@ import lombok.ToString;
 @Entity
 @Table(name = "specializations")
 public class Specialization {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "specialization_id")
     private long id;
     private String name;
+    public Specialization(String name) {
+        this.name = name;
+    }
 
 }

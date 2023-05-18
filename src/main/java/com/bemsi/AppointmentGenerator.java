@@ -1,16 +1,10 @@
 package com.bemsi;
 
 import com.bemsi.model.Appointment;
-import com.bemsi.model.User;
 import com.bemsi.model.UserDetails;
 import com.bemsi.repository.AppointmentRepository;
 import com.bemsi.repository.UserDetailsRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
@@ -20,19 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class AppointmentInitializer implements CommandLineRunner {
+public class AppointmentGenerator {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @Autowired
     AppointmentRepository appointmentRepository;
-    @Autowired
     UserDetailsRepository userDetailsRepository;
 
-    @Override
-    @Transactional
-    public void run(String... args) throws Exception {
+    @Autowired
+    public AppointmentGenerator(AppointmentRepository appointmentRepository, UserDetailsRepository userDetailsRepository) {
+        this.appointmentRepository = appointmentRepository;
+        this.userDetailsRepository = userDetailsRepository;
+    }
+
+    public void generateAppointments(List<UserDetails> doctors){
 
         List<LocalDate> dates = new ArrayList<>();
         LocalDate currentDate = LocalDate.now().plusDays(1); // Start from tomorrow
@@ -42,7 +35,7 @@ public class AppointmentInitializer implements CommandLineRunner {
             }
             currentDate = currentDate.plusDays(1);
         }
-        List<UserDetails> doctors =userDetailsRepository.findAllDoctors();
+
         for (UserDetails doctor : doctors) {
             for (LocalDate date : dates) {
                 LocalDateTime startTime = date.atTime(9, 0);
@@ -51,7 +44,7 @@ public class AppointmentInitializer implements CommandLineRunner {
                     if(!appointmentRepository.existsByDoctorAndStartTime(doctor, startTime)){
                         appointmentRepository.save(new Appointment(doctor, startTime));
                     }
-                    startTime = startTime.plusMinutes(30); // Increment by half an hour
+                    startTime = startTime.plusMinutes(30);
                 }
             }
         }

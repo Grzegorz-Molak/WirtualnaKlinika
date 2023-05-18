@@ -1,5 +1,6 @@
 package com.bemsi.service;
 
+import com.bemsi.AppointmentGenerator;
 import com.bemsi.DTOs.mapper.UserMapper;
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,16 +36,19 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    private final AppointmentGenerator appointmentGenerator;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserDetailsRepository userDetailsRepository,
                            SpecializationRepository specializationRepository, LoginPasswordGenerator loginPasswordGenerator,
-                           PasswordEncoder passwordEncoder, JwtService jwtService) {
+                           PasswordEncoder passwordEncoder, JwtService jwtService, AppointmentGenerator appointmentGenerator) {
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.specializationRepository = specializationRepository;
         this.loginPasswordGenerator = loginPasswordGenerator;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.appointmentGenerator = appointmentGenerator;
     }
 
 
@@ -81,6 +86,12 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         UserDetails userDetails = new UserDetails(Integer.parseInt(login), specialization, userDetailsDto);
         userDetailsRepository.save(userDetails);
+
+        if((userDetailsDto.role() & 2) == 2){
+            List<UserDetails> doctors = new ArrayList<>();
+            doctors.add(userDetails);
+            appointmentGenerator.generateAppointments(doctors);
+        }
 
         User user1 = new User(login, password, true);
 
