@@ -91,6 +91,23 @@ public class UserController {
         }
     }
 
+    @PostMapping("jwt/invalidate")
+    private String jwtInvalidateToken(@NotNull HttpServletRequest request){
+        final String header = request.getHeader("Authorization");
+        String jwt;
+        if (header != null && header.startsWith("Bearer ")) {
+            jwt = header.substring(7);
+            if (jwtService.validateJws(jwt)) {
+                jwtService.invalidateToken(jwt);
+                return "Unieważniono token";
+            } else {
+                return "Nieprawidłowy token";
+            }
+        } else {
+            return "Hamuj się!";
+        }
+    }
+
 
 }
 
