@@ -39,8 +39,7 @@ public class JwtService {
     InvalidatedTokensRepository invalidatedTokensRepository;
     @Autowired
     public JwtService(@Value("${jwt.secret.key}") String secretString,
-                      InvalidatedTokensRepository invalidatedTokensRepository,
-                      UserService userService){
+                      InvalidatedTokensRepository invalidatedTokensRepository){
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
         this.invalidatedTokensRepository = invalidatedTokensRepository;
     }
