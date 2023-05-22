@@ -68,7 +68,7 @@ public class UserController {
 
     @GetMapping("/jwt/test/{token}")
     private String jwtTest(@PathVariable String token) {
-        if (jwtService.validateJws(token)) {
+        if (jwtService.validateJws(token).isPresent()) {
             return "Witaj podróźniku";
         } else {
             return "Odejdź póki masz szanse";
@@ -81,7 +81,7 @@ public class UserController {
         String jwt;
         if (header != null && header.startsWith("Bearer ")) {
             jwt = header.substring(7);
-            if (jwtService.validateJws(jwt)) {
+            if (jwtService.validateJws(jwt).isPresent()) {
                 return "Witaj " + jwtService.extractUsername(jwt);
             } else {
                 return "Odejdź póki masz szanse";
@@ -97,7 +97,7 @@ public class UserController {
         String jwt;
         if (header != null && header.startsWith("Bearer ")) {
             jwt = header.substring(7);
-            if (jwtService.validateJws(jwt)) {
+            if (jwtService.validateJws(jwt).isPresent()) {
                 jwtService.invalidateToken(jwt);
                 return "Unieważniono token";
             } else {

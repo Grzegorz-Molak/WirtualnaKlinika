@@ -1,8 +1,10 @@
 package com.bemsi.security;
 
+import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.model.Specialization;
 import com.bemsi.model.User;
 import com.bemsi.model.UserDetails;
+import com.bemsi.service.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
@@ -35,11 +37,14 @@ public class JwtService {
 
     SecretKey key;
     InvalidatedTokensRepository invalidatedTokensRepository;
+    UserService userService;
     @Autowired
     public JwtService(@Value("${jwt.secret.key}") String secretString,
-                      InvalidatedTokensRepository invalidatedTokensRepository){
+                      InvalidatedTokensRepository invalidatedTokensRepository,
+                      UserService userService){
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
         this.invalidatedTokensRepository = invalidatedTokensRepository;
+        this.userService = userService;
     }
 
     public String generateJws(String login) {
@@ -52,23 +57,28 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateJws(String jwsString){
+    public Optional<UserDetailsDto> validateJws(String jwt){
         Jws<Claims> jws;
         try {
             jws = Jwts.parserBuilder()  // (1)
                     .setSigningKey(key)         // (2)
                     .build()                    // (3)
-                    .parseClaimsJws(jwsString); // (4)
+                    .parseClaimsJws(jwt); // (4)
             if(new Date().after(jws.getBody().getExpiration()))
-                return false;
+                return Optional.empty();
         }
             // we can safely trust the JWT
         catch (JwtException ex) {       // (5)
-                return false;
+                return Optional.empty();
                 // we *cannot* use the JWT as intended by its creator
             }
 
-        return invalidatedTokensRepository.findByToken(jwsString).isEmpty();
+        boolean isInvalidated = invalidatedTokensRepository.findByToken(jwt).isPresent();
+        if(isInvalidated){
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(userService.findUserDetailsByLogin(extractUsername(jwt)));
     }
 
     public void invalidateToken(String jwt){
