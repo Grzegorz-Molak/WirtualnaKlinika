@@ -37,14 +37,12 @@ public class JwtService {
 
     SecretKey key;
     InvalidatedTokensRepository invalidatedTokensRepository;
-    UserService userService;
     @Autowired
     public JwtService(@Value("${jwt.secret.key}") String secretString,
                       InvalidatedTokensRepository invalidatedTokensRepository,
                       UserService userService){
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
         this.invalidatedTokensRepository = invalidatedTokensRepository;
-        this.userService = userService;
     }
 
     public String generateJws(String login) {
@@ -57,7 +55,7 @@ public class JwtService {
                 .compact();
     }
 
-    public Optional<UserDetailsDto> validateJws(String jwt){
+    public Optional<String> validateJws(String jwt){
         Jws<Claims> jws;
         try {
             jws = Jwts.parserBuilder()  // (1)
@@ -78,7 +76,7 @@ public class JwtService {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(userService.findUserDetailsByLogin(extractUsername(jwt)));
+        return Optional.of(extractUsername(jwt));
     }
 
     public void invalidateToken(String jwt){
