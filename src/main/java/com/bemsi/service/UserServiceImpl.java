@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String logIn(UserDto userDto) {
-
+        if(userRepository.findByLogin(userDto.login()) == null) return "Podano niepoprawne dane";
         boolean isSuccess = passwordEncoder.validatePassword(
                 userDto.password(), userRepository.findByLogin(userDto.login()).getPassword());
 

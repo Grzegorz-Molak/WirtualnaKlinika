@@ -30,14 +30,14 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public AppointmentDto findAppointment(Long id) {
+    public AppointmentDto findAppointment(long id) {
         return appointmentRepository.findById(id).map(AppointmentMapper::toAppointmentDto).orElse(null);
     }
 
     @Override
     public String makeAppointment(long appointment_id, String user_login) {
-        Appointment appointment = appointmentRepository.findById(appointment_id);
-        if (appointment == null){
+        Optional<Appointment> appointment = appointmentRepository.findById(appointment_id);
+        if (appointment.isEmpty()){
             return "Nie ma wizyty z tym id";
         }
 
@@ -50,9 +50,9 @@ public class AppointmentServiceImpl implements AppointmentService{
             return "ten użytkownik to nie pacjent";
         }
 
-        if (appointment.getPatient() == null) {
-            appointment.setPatient(userDetails.get());
-            appointmentRepository.save(appointment);
+        if (appointment.get().getPatient() == null) {
+            appointment.get().setPatient(userDetails.get());
+            appointmentRepository.save(appointment.get());
             return "success";
         }
         else{

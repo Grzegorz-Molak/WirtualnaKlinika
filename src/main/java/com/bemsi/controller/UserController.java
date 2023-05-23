@@ -62,6 +62,24 @@ public class UserController {
         return UserMapper.toUserDetailsDto(user);
     }
 
+    @PostMapping("jwt/logout")
+    private String jwtInvalidateToken(@NotNull HttpServletRequest request){
+        final String header = request.getHeader("Authorization");
+        String jwt;
+        if (header != null && header.startsWith("Bearer ")) {
+            jwt = header.substring(7);
+            if (jwtService.validateJws(jwt).isPresent()) {
+                jwtService.invalidateToken(jwt);
+                return "Unieważniono token";
+            } else {
+                return "Nieprawidłowy token";
+            }
+        } else {
+            return "Wystąpił błąd!";
+        }
+    }
+
+
     //TODO Usunąć poniższe z prdukcji!!! tylko do testowania
     @GetMapping("")
     private List<UserDto> allUsers() {
@@ -97,22 +115,7 @@ public class UserController {
     }
 
 
-    @PostMapping("jwt/invalidate")
-    private String jwtInvalidateToken(@NotNull HttpServletRequest request){
-        final String header = request.getHeader("Authorization");
-        String jwt;
-        if (header != null && header.startsWith("Bearer ")) {
-            jwt = header.substring(7);
-            if (jwtService.validateJws(jwt).isPresent()) {
-                jwtService.invalidateToken(jwt);
-                return "Unieważniono token";
-            } else {
-                return "Nieprawidłowy token";
-            }
-        } else {
-            return "Hamuj się!";
-        }
-    }
+
 
     @GetMapping("accesses")
     private String showAccesses(){

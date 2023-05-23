@@ -57,28 +57,23 @@ public class JwtService {
     public UserDetails authorization(@NotNull HttpServletRequest request){
             final String header = request.getHeader("Authorization");
             String jwt;
-            if (header != null && header.startsWith("Bearer ")) {
-                jwt = header.substring(7);
-                var username = validateJws(jwt);
-                if ( username.isPresent()){
-                    //return username.get(); //Zwracamy nazwę użytkownika
-                    var user = userDetailsRepository.findById(Long.parseLong(username.get()));
-                    if(user.isPresent()){
-                        return user.get();
-                    }
-                    else{
-                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
-                    }
-                } else {
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
-                }
-            } else {
+            if (header == null || !header.startsWith("Bearer ")){
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
             }
+            jwt = header.substring(7);
+            var username = validateJws(jwt);
+            if ( username.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+            }
+            var user = userDetailsRepository.findById(Long.parseLong(username.get()));
+            if(user.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+            }
+            return user.get();
     }
 
     public String generateJws(String login) {
-        final int MINUTES = 3;
+        final int MINUTES = 10;
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(login)

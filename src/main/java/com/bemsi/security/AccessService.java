@@ -21,7 +21,7 @@ public class AccessService {
     }
 
     public enum Resource{
-        PROFILE, APPOINTMENT
+        PROFILE, APPOINTMENT, APPOINTMENT_UPDATE;
     }
 
     public void validateAccess(Resource resource, UserDetails user, Long resource_id){
@@ -37,6 +37,18 @@ public class AccessService {
                 validated =
                         user.getId() == appointment.get().getPatient().getId() ||
                         user.getId() == appointment.get().getDoctor().getId();
+            }
+            case APPOINTMENT_UPDATE -> {
+                Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
+                if(appointment.isEmpty() || (user.getRole() & 2) == 2){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
+                    validated = false;
+                    break;
+                }
+                if(appointment.get().getPatient() != null){
+                    validated = false;
+                    break;
+                }
+                validated = true;
             }
             default -> validated = false;
         };

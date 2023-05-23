@@ -12,7 +12,7 @@ public interface AppointmentService {
 
     List<AppointmentDto> findAll();
 
-    AppointmentDto findAppointment(Long id);
+    AppointmentDto findAppointment(long id);
 
     String makeAppointment(long appointment_id, String  user_login);
 }
