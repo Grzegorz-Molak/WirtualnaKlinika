@@ -6,10 +6,13 @@ import com.bemsi.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AppointmentService {
 
     List<AppointmentDto> findAll();
+
+    AppointmentDto findAppointment(Long id);
 
     String makeAppointment(long appointment_id, String  user_login);
 }

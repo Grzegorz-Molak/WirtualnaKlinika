@@ -30,6 +30,11 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
+    public AppointmentDto findAppointment(Long id) {
+        return appointmentRepository.findById(id).map(AppointmentMapper::toAppointmentDto).orElse(null);
+    }
+
+    @Override
     public String makeAppointment(long appointment_id, String user_login) {
         Appointment appointment = appointmentRepository.findById(appointment_id);
         if (appointment == null){
