@@ -11,13 +11,14 @@ import com.bemsi.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
 
-@CrossOrigin ("http://localhost:3000")
 @RestController
 @RequestMapping("/user")
 public class UserController {
