@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
             long expirationTimestamp = expirationDateTime.toEpochSecond(ZoneOffset.UTC);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, "token=" + token + "; Path=/; Expires=" + expirationTimestamp + "HttpOnly");
+            headers.add(HttpHeaders.SET_COOKIE, "token=" + token + "; Path=/; Expires=" + expirationTimestamp + ";HttpOnly;");
 
             return ResponseEntity.ok().headers(headers).body("Zalogowano pomyślnie");
         }

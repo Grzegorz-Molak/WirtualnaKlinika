@@ -26,10 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Repository;
+
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.client.HttpClientErrorException;
+
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
