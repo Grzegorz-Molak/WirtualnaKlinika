@@ -2,15 +2,14 @@ package com.bemsi.service;
 
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
-import com.bemsi.model.User;
-import com.bemsi.security.PasswordEncoder;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Optional;
+
 
 public interface UserService {
 
-    String logIn(UserDto userDto);
+    ResponseEntity<String> logIn(UserDto userDto);
     UserDto signUp(UserDetailsDto userDetailsDto);
 
     //TODO nwm czy usuwać

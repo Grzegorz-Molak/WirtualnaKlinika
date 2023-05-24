@@ -18,10 +18,14 @@ import com.bemsi.security.LoginPasswordGenerator;
 import com.bemsi.security.PasswordEncoder;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,16 +57,25 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public String logIn(UserDto userDto) {
-        if(userRepository.findByLogin(userDto.login()) == null) return "Podano niepoprawne dane";
+    public ResponseEntity<String> logIn(UserDto userDto) {
+        if(userRepository.findByLogin(userDto.login()) == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Podano niepoprawne dane");
+
         boolean isSuccess = passwordEncoder.validatePassword(
                 userDto.password(), userRepository.findByLogin(userDto.login()).getPassword());
 
         if (isSuccess) {
-            return jwtService.generateJws(userDto.login());
+            LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(5);
+            String token =  jwtService.generateJws(userDto.login());
+            long expirationTimestamp = expirationDateTime.toEpochSecond(ZoneOffset.UTC);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, "token=" + token + "; Path=/; Expires=" + expirationTimestamp + "HttpOnly");
+
+            return ResponseEntity.ok().headers(headers).body("Zalogowano pomyślnie");
         }
 
-        return "Podano niepoprawne dane";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Podano niepoprawne dane");
     }
 
     @Override
