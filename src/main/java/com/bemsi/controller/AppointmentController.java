@@ -20,7 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin ("http://localhost:3000")
+@CrossOrigin (origins={"https://localhost:3000"}, allowCredentials = "true")
+//(origins={"https://localhost:3000"}, allowedHeaders = "*",exposedHeaders = {"Access-Control-Allow-Origin","Access-Control-Allow-Credentials"},)
 @RestController
 @RequestMapping("/appointment")
 public class AppointmentController {

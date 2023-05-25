@@ -19,7 +19,7 @@ import java.util.List;
 
 
 
-@CrossOrigin ("http://localhost:3000")
+@CrossOrigin (origins={"https://localhost:3000"}, allowCredentials = "true")
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -55,8 +55,8 @@ public class UserController {
     //TODO Sprawdzanie tokenu
     //Tylko zalogowany użytkownik może dostać swoje dane
     @GetMapping("/{profile}")
-    private UserDetailsDto userDetailsByLogin(@PathVariable String profile, @NotNull HttpServletRequest request) {
-        UserDetails user = jwtService.authorization(request);
+    private UserDetailsDto userDetailsByLogin(@PathVariable String profile, @NotNull HttpServletRequest request,  @CookieValue(name="token") String token) {
+        UserDetails user = jwtService.authorizationCookie(token);
         accessService.validateAccess(AccessService.Resource.PROFILE,
                 user,
                 Long.parseLong(profile));

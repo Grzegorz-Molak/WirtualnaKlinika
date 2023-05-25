@@ -71,6 +71,22 @@ public class JwtService {
             return user.get();
     }
 
+    public UserDetails authorizationCookie( String token){
+
+        String jwt=token;
+        if (token == null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+        }
+        var username = validateJws(jwt);
+        if ( username.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+        }
+        var user = userDetailsRepository.findById(Long.parseLong(username.get()));
+        if(user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+        }
+        return user.get();
+    }
     public String generateJws(String login) {
         final int MINUTES = 10;
         return Jwts.builder()
