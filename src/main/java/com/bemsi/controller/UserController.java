@@ -11,12 +11,14 @@ import com.bemsi.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
-
+import java.util.Optional;
 
 
 @CrossOrigin (origins={"https://localhost:3000"}, allowCredentials = "true")
@@ -55,28 +57,24 @@ public class UserController {
     //TODO Sprawdzanie tokenu
     //Tylko zalogowany użytkownik może dostać swoje dane
     @GetMapping("/{profile}")
-    private UserDetailsDto userDetailsByLogin(@PathVariable String profile, @NotNull HttpServletRequest request,  @CookieValue(name="token") String token) {
+    private UserDetailsDto userDetailsByLogin(@PathVariable String profile,  @CookieValue(name="token") String token) {
         UserDetails user = jwtService.authorizationCookie(token);
         accessService.validateAccess(AccessService.Resource.PROFILE,
                 user,
                 Long.parseLong(profile));
-        return UserMapper.toUserDetailsDto(user);
+        Optional<UserDetails> searched_profile = userDetailsRepository.findById(Long.parseLong(profile));
+        if(searched_profile.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+        return UserMapper.toUserDetailsDto(searched_profile.get());
     }
 
-    @PostMapping("jwt/logout")
-    private String jwtInvalidateToken(@NotNull HttpServletRequest request){
-        final String header = request.getHeader("Authorization");
-        String jwt;
-        if (header != null && header.startsWith("Bearer ")) {
-            jwt = header.substring(7);
-            if (jwtService.validateJws(jwt).isPresent()) {
-                jwtService.invalidateToken(jwt);
-                return "Unieważniono token";
-            } else {
-                return "Nieprawidłowy token";
-            }
+    @PostMapping("logout")
+    private String jwtInvalidateToken(@CookieValue(name="token") String token){
+        String jwt = token;
+        if (jwtService.validateJws(jwt).isPresent()) {
+            jwtService.invalidateToken(jwt);
+            return "Unieważniono token";
         } else {
-            return "Wystąpił błąd!";
+            return "Nieprawidłowy token";
         }
     }
 
@@ -96,27 +94,6 @@ public class UserController {
     private List<UserDetailsDto> allDoctorsDetails() {
         return userService.findAllDoctors();
     }
-
-    @GetMapping("/jwt/{login}")
-    private String jwtGen(@PathVariable String login) throws Exception {
-        UserDetailsDto userDetailsDto = userService.findUserDetailsByLogin(login); //znaleziony user
-        if (userDetailsDto == null)
-            return "Nieprawidłowy user";
-        String jwt = jwtService.generateJws(login);
-        return jwt;
-    }
-
-    @GetMapping("/jwt/test/{token}")
-    private String jwtTest(@PathVariable String token) {
-        if (jwtService.validateJws(token).isPresent()) {
-            return "Witaj podróźniku";
-        } else {
-            return "Odejdź póki masz szanse";
-        }
-    }
-
-
-
 
     @GetMapping("accesses")
     private String showAccesses(){
