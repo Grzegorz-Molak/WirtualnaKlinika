@@ -105,6 +105,10 @@ public class AccessService {
                         validated = false;
                         break;
                     }
+                    else if((resource_user.get().getRole() & 1) == 1){
+                        validated = true;
+                        break;
+                    }
                 }
                 if((user.getRole() & 1) == 1){
                     if(user.getId() != resource_id) {

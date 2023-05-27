@@ -71,7 +71,6 @@ public class AppointmentController {
         if(searchedUser.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
         List<Appointment> appointments = new ArrayList<>();
         accessService.validateAccess(AccessService.Resource.APPOINTMENT_LIST, user, Long.parseLong(user_login));
-
         if((user.getRole() & 4) == 4){ // Zakładamy że nie ma możliwości żeby ktoś był personelem i lekarzem jednoczesnie
             if(user.getId() == searchedUser.get().getId()) {
                 appointments = appointmentRepository.findAllByPatientAndStartTimeBefore(searchedUser.get(),
@@ -99,7 +98,7 @@ public class AppointmentController {
         return appointments
                 .stream()
                 .map(AppointmentMapper::toAppointmentDto)
-                .toList();
+                .distinct().toList();
     }
 
     @GetMapping("{user_login}/calendar")
@@ -137,7 +136,7 @@ public class AppointmentController {
         return appointments
                 .stream()
                 .map(AppointmentMapper::toAppointmentDto)
-                .toList();
+                .distinct().toList();
     }
 
     @GetMapping("/{id}")
