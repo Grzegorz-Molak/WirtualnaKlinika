@@ -3,13 +3,13 @@ package com.bemsi.controller;
 import com.bemsi.DTOs.mapper.UserMapper;
 import com.bemsi.DTOs.model.UserDetailsDto;
 import com.bemsi.DTOs.model.UserDto;
+import com.bemsi.DTOs.requests.ChangePasswordRequest;
+import com.bemsi.model.User;
 import com.bemsi.model.UserDetails;
 import com.bemsi.repository.UserDetailsRepository;
 import com.bemsi.security.AccessService;
 import com.bemsi.security.JwtService;
 import com.bemsi.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -79,6 +79,18 @@ public class UserController {
         } else {
             return "Nieprawidłowy token";
         }
+    }
+
+    @PutMapping("/changePassword/{profile}")
+    private String changePassword(@PathVariable String profile, @CookieValue(name="token") String token, @RequestBody ChangePasswordRequest request){
+        UserDetails user = jwtService.authorizationCookie(token);
+        accessService.validateAccess(AccessService.Resource.PROFILE,
+                user,
+                Long.parseLong(profile));
+
+        return userService.changePassword(profile, request.getOldPassword(), request.getNewPassword());
+
+
     }
 
     @GetMapping("/refresh")

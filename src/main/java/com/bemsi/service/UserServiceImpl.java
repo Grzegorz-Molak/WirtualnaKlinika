@@ -118,6 +118,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String changePassword(String profile, String oldPassword, String newPassword){
+        User user = userRepository.findByLogin(profile);
+
+        if(!passwordEncoder.validatePassword(oldPassword, user.getPassword())){
+            return "Stare hasło jest niepoprawne";
+        }
+
+        user.setPassword(passwordEncoder.createHash(newPassword));
+        userRepository.save(user);
+
+        return "Udało sie zmienić hasło";
+
+    }
+
+    @Override
     public UserDetailsDto findUserDetailsByLogin(String login) {
         return userDetailsRepository
                 .findById(Long.parseLong(login)).

@@ -11,6 +11,8 @@ public interface UserService {
 
     ResponseEntity<String> logIn(UserDto userDto);
     UserDto signUp(UserDetailsDto userDetailsDto);
+    String changePassword(String profile, String oldPassword, String newPassword);
+
 
     //TODO nwm czy usuwać
     UserDetailsDto findUserDetailsByLogin(String login);
@@ -19,5 +21,6 @@ public interface UserService {
     List<UserDetailsDto> findAllDetails();
 
     List<UserDetailsDto> findAllDoctors();
-    //   void logIn();
+
+
 }
