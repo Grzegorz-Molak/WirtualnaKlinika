@@ -19,7 +19,7 @@ public class PasswordEncoder {
             byte[] salt = getSalt();
 
             PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 
             byte[] hash = factory.generateSecret(spec).getEncoded();
 
@@ -60,7 +60,7 @@ public class PasswordEncoder {
 
             PBEKeySpec spec = new PBEKeySpec(originalPassword.toCharArray(),
                     salt, iterations, hash.length * 8);
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
             byte[] testHash = skf.generateSecret(spec).getEncoded();
 
             int diff = hash.length ^ testHash.length;
