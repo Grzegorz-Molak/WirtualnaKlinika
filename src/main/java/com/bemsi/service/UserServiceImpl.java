@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
             long expirationTimestamp = expirationDateTime.toEpochSecond(ZoneOffset.UTC);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, "token=" + token + "; Path=/; Expires=" + expirationTimestamp + ";HttpOnly;");
+            headers.add(HttpHeaders.SET_COOKIE, "token=" + token + "; Path=/; Expires=" + expirationTimestamp + ";HttpOnly;Secure;");
 
             return ResponseEntity.ok().headers(headers).body("Zalogowano pomyślnie");
         }
@@ -90,6 +90,11 @@ public class UserServiceImpl implements UserService {
         if (specialization != null && (userDetailsDto.role() & 2) == 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Ta osoba nie jest lekarzem, więc nie może mieć specjalizacji");
+        }
+
+        if(userDetailsRepository.existsByEmail(userDetailsDto.email())){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Email zajęty");
         }
 
         String login = loginPasswordGenerator.generateLogin();

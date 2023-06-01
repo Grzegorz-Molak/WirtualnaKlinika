@@ -11,6 +11,6 @@ public interface UserDetailsRepository extends JpaRepository<UserDetails, Long> 
     @Query(value = "SELECT * FROM user_details u WHERE u.role & 2 = 2",
             nativeQuery = true)
     List<UserDetails> findAllDoctors();
-
+    boolean existsByEmail(String email);
     //UserDetails findById(long id);
 }

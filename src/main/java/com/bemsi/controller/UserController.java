@@ -11,11 +11,14 @@ import com.bemsi.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +70,7 @@ public class UserController {
         return UserMapper.toUserDetailsDto(searched_profile.get());
     }
 
-    @PostMapping("logout")
+    @PostMapping("/logout")
     private String jwtInvalidateToken(@CookieValue(name="token") String token){
         String jwt = token;
         if (jwtService.validateJws(jwt).isPresent()) {
@@ -76,6 +79,18 @@ public class UserController {
         } else {
             return "Nieprawidłowy token";
         }
+    }
+
+    @GetMapping("/refresh")
+    private ResponseEntity<String> refreshToken(@CookieValue(name = "token") String token){
+        UserDetails user = jwtService.authorizationCookie(token);
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(5);
+        String new_token = jwtService.generateJws(String.format("%07d", user.getId()));
+        long expirationTimestamp = expirationDateTime.toEpochSecond(ZoneOffset.UTC);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, "token=" + new_token + "; Path=/; Expires=" + expirationTimestamp + ";HttpOnly;Secure;");
+        jwtService.invalidateToken(token);
+        return ResponseEntity.ok().headers(headers).body("Zaktualizowano token, stary został unieważniony");
     }
 
 

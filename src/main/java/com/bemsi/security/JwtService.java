@@ -88,7 +88,7 @@ public class JwtService {
         return user.get();
     }
     public String generateJws(String login) {
-        final int MINUTES = 10;
+        final int MINUTES = 5;
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(login)

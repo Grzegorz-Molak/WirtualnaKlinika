@@ -4,13 +4,16 @@ import com.bemsi.model.Specialization;
 import com.bemsi.model.UserDetails;
 import com.bemsi.repository.SpecializationRepository;
 import com.bemsi.repository.UserDetailsRepository;
+import com.bemsi.security.InvalidatedTokensRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,11 +25,17 @@ public class DatabaseInitializer implements CommandLineRunner {
     AppointmentGenerator appointmentGenerator;
     SpecializationRepository specializationRepository;
 
+    InvalidatedTokensRepository invalidatedTokensRepository;
+
     @Autowired
-    public DatabaseInitializer(UserDetailsRepository userDetailsRepository, AppointmentGenerator appointmentGenerator, SpecializationRepository specializationRepository) {
+    public DatabaseInitializer(UserDetailsRepository userDetailsRepository,
+                               AppointmentGenerator appointmentGenerator,
+                               SpecializationRepository specializationRepository,
+                                InvalidatedTokensRepository invalidatedTokensRepository) {
         this.userDetailsRepository = userDetailsRepository;
         this.appointmentGenerator = appointmentGenerator;
         this.specializationRepository = specializationRepository;
+        this.invalidatedTokensRepository = invalidatedTokensRepository;
     }
     @Override
     @Transactional
@@ -48,6 +57,8 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
         List<UserDetails> doctors =userDetailsRepository.findAllDoctors();
         appointmentGenerator.generateAppointments(doctors);
+
+        invalidatedTokensRepository.removeAllByExpirationTimeBefore(new Date());
 
     }
 
