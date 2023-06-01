@@ -27,13 +27,13 @@ public class AccessService {
     }
 
     public enum Resource{
-        PROFILE, APPOINTMENT, APPOINTMENT_UPDATE, APPOINTMENT_RESIGN, APPOINTMENT_LIST;
+        PROFILE, APPOINTMENT, APPOINTMENT_UPDATE, APPOINTMENT_RESIGN, APPOINTMENT_LIST, SIGN_UP;
     }
 
-    public void validateAccess(Resource resource, UserDetails user, Long resource_id){
+    public void validateAccess(Resource resource, UserDetails user, long resource_id){
         boolean validated;
         switch(resource){
-            case PROFILE -> validated = (user.getId() == resource_id || (user.getRole() & 4) == 4);
+            case PROFILE -> validated = (user.getId() == resource_id);
             case APPOINTMENT ->  {
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
                 if(appointment.isEmpty()){
@@ -54,7 +54,7 @@ public class AccessService {
             }
             case APPOINTMENT_UPDATE -> {
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
-                if(appointment.isEmpty() || (user.getRole() & 2) == 2){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
+                if(appointment.isEmpty() || ((user.getRole() & 2) == 2 && (user.getRole() & 1) == 0) ){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
                     validated = false;
                     break;
                 }
@@ -66,7 +66,7 @@ public class AccessService {
             }
             case APPOINTMENT_RESIGN -> {
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
-                if(appointment.isEmpty() || (user.getRole() & 2) == 2){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
+                if(appointment.isEmpty() || ((user.getRole() & 2) == 2 && (user.getRole() & 1) == 0) ){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
                     validated = false;
                     break;
                 }
@@ -117,6 +117,18 @@ public class AccessService {
                     }
                 }
                 validated = true;
+            }
+            case SIGN_UP -> {  //resource_id to rola tworzonego użytkownika
+                validated = false;
+                if(((resource_id & 4) == 4 || (resource_id & 2) == 2) && //chcemy zrobić lekarza lub personel
+                ((user.getRole() & 8) == 8)){
+                   validated = true;
+                   break;
+                }
+                if((resource_id & 1) == 1 && (user.getRole() & 4) == 4){
+                    validated = true;
+                    break;
+                }
             }
             default -> validated = false;
         };

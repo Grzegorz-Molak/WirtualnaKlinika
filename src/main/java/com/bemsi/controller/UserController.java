@@ -48,7 +48,9 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    private UserDto signUp(@RequestBody UserDetailsDto userDetailsDto) {
+    private UserDto signUp(@RequestBody UserDetailsDto userDetailsDto, @CookieValue(name="token") String token) {
+        UserDetails user = jwtService.authorizationCookie(token);
+        accessService.validateAccess(AccessService.Resource.SIGN_UP, user, userDetailsDto.role());
         return userService.signUp(userDetailsDto);
     }
 

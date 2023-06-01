@@ -25,7 +25,7 @@ public class LoginPasswordGenerator {
     }
 
     public String generatePassword(){
-        int STRING_LENGTH = 6;
+        int STRING_LENGTH = 12;
         String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         StringBuilder password = new StringBuilder(STRING_LENGTH);

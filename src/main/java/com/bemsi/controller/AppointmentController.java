@@ -151,20 +151,26 @@ public class AppointmentController {
     }
 
 
-    @PatchMapping("/{appointment_id}")
-    private AppointmentDto patchAppointmentWithPatient(@PathVariable long appointment_id, @RequestBody UserDetails patient,
+    @PatchMapping("/{appointment_id}/{patient_login}")
+    private String patchAppointmentWithPatient(@PathVariable long appointment_id, @PathVariable String patient_login,
                                                        @CookieValue(name="token") String token){
         UserDetails user = jwtService.authorizationCookie(token);
+        Optional<UserDetails> optPatient = userDetailsRepository.findById(Long.parseLong(patient_login));
+        if(optPatient.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+        UserDetails patient = optPatient.get();
+        System.out.println("Raz");
         accessService.validateAccess(AccessService.Resource.APPOINTMENT_UPDATE,
                 user,
                 appointment_id);
+        System.out.println("Raz");
         Optional<Appointment> appointment = appointmentRepository.findById(appointment_id);
         if(appointment.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
         if(user.getId() != patient.getId() && (user.getRole() & 4) == 0) //Zapis nie siebie i nie jako personel
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
+        System.out.println("Raz");
         appointment.get().setPatient(patient);
         appointmentRepository.save(appointment.get());
-        return AppointmentMapper.toAppointmentDto(appointment.get());
+        return "Pomyślnie zapisano na wizytę #"+appointment.get().getId()+" "+appointment.get().getStartTime();
     }
     @PatchMapping("/{appointment_id}/resign")
     private String resignAppointment(@PathVariable long appointment_id, @CookieValue(name="token") String token){
