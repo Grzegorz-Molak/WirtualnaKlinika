@@ -70,31 +70,24 @@ public class AppointmentController {
         Optional<UserDetails> searchedUser= userDetailsRepository.findById(Long.parseLong(user_login));
         if(searchedUser.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
         List<Appointment> appointments = new ArrayList<>();
-        accessService.validateAccess(AccessService.Resource.APPOINTMENT_LIST, user, Long.parseLong(user_login));
-        if((user.getRole() & 4) == 4){ // Zakładamy że nie ma możliwości żeby ktoś był personelem i lekarzem jednoczesnie
-            if(user.getId() == searchedUser.get().getId()) {
-                appointments = appointmentRepository.findAllByPatientAndStartTimeBefore(searchedUser.get(),
-                        LocalDateTime.now());
-            }
-           /* else{
-                appointments = appointmentRepository.findAllByPatientAndStartTimeBefore(searchedUser.get(),
-                        LocalDateTime.now()); // Nie wiem czy to tu ma być?
-            }*/
-        }
-        else if((user.getRole() & 2) == 2) {// Zakładamy że nie ma możliwości żeby ktoś był personelem i lekarzem jednoczesnie
-            if(user.getId() == searchedUser.get().getId()){ //szukamy siebie
-                appointments = appointmentRepository
-                        .findAllByDoctorAndPatientNotNullAndStartTimeBefore(searchedUser.get(), LocalDateTime.now());
-            }
-            else if ((searchedUser.get().getRole() & 1) == 1) {//Szukamy pacjenta
-                appointments = appointmentRepository.findAllByPatientAndDoctorAndStartTimeBefore(searchedUser.get(),
-                        user, LocalDateTime.now()); //Szukamy wspólnych wizyt
-            }
-        }
-        if((user.getRole() & 1) == 1)
-            appointments.addAll(appointmentRepository
-                    .findAllByPatientAndStartTimeBefore(searchedUser.get(), LocalDateTime.now()));
+        // ***********************************************************
+        accessService.validateAccess(AccessService.Resource.APPOINTMENT_HISTORY, user, Long.parseLong(user_login));
 
+        if((user.getRole() & 1) == 1) appointments.addAll( //wiadomo że chcemy swoje wizyty wyszuka
+            appointmentRepository.findAllByPatientAndStartTimeBefore(searchedUser.get(), LocalDateTime.now())
+        );
+        if((user.getRole() & 2) == 2){
+            //1. Wyszukujemy swoje wizyty jako lekarz
+            if(user.getRole() == searchedUser.get().getId())
+                appointments.addAll( //Zbieramy wszystkie swoje wizyty przeszłe
+                    appointmentRepository.findAllByDoctorAndPatientNotNullAndStartTimeBefore(user, LocalDateTime.now())
+            );
+            //2. Wyszukujemy wspólne wizyty z jakimś pacjentem
+            // Jeżeli takich nie ma to no problem, bo nic z bazy nie wybierze
+            appointments.addAll(
+                    appointmentRepository.findAllByPatientAndDoctorAndStartTimeBefore(searchedUser.get(), user, LocalDateTime.now())
+            );
+        }
         return appointments
                 .stream()
                 .map(AppointmentMapper::toAppointmentDto)
@@ -108,31 +101,17 @@ public class AppointmentController {
         Optional<UserDetails> searchedUser= userDetailsRepository.findById(Long.parseLong(user_login));
         if(searchedUser.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
         List<Appointment> appointments = new ArrayList<>();
-        accessService.validateAccess(AccessService.Resource.APPOINTMENT_LIST, user, Long.parseLong(user_login));
-
-        if((user.getRole() & 4) == 4){ // Zakładamy że nie ma możliwości żeby ktoś był personelem i lekarzem jednoczesnie
-            if((searchedUser.get().getRole() & 2) == 2)
-                appointments = appointmentRepository.findAllByDoctorAndPatientNotNullAndStartTimeAfter(searchedUser.get(),
-                        LocalDateTime.now());
-            if((searchedUser.get().getRole() & 1) == 1){
-                appointments.addAll(appointmentRepository.findAllByPatientAndStartTimeAfter(searchedUser.get(),
-                        LocalDateTime.now()));
-            }
+        // ***********************************************************
+        accessService.validateAccess(AccessService.Resource.APPOINTMENT_CALENDAR, user, Long.parseLong(user_login));
+        if((searchedUser.get().getRole() & 1) == 1){
+            appointments.addAll( //wiadomo że chcemy swoje wizyty wyszukać
+                    appointmentRepository.findAllByPatientAndStartTimeAfter(searchedUser.get(), LocalDateTime.now()));
         }
-        else if((user.getRole() & 2) == 2) {// Zakładamy że nie ma możliwości żeby ktoś był personelem i lekarzem jednoczesnie
-            if(user.getId() == searchedUser.get().getId()){ //szukamy siebie
-                appointments = appointmentRepository
-                        .findAllByDoctorAndPatientNotNullAndStartTimeAfter(searchedUser.get(), LocalDateTime.now());
-            }
-            else if ((searchedUser.get().getRole() & 1) == 1) {//Szukamy pacjenta
-                appointments = appointmentRepository.findAllByPatientAndDoctorAndStartTimeAfter(searchedUser.get(),
-                        user, LocalDateTime.now()); //Szukamy wspólnych wizyt
-            }
+        if((searchedUser.get().getRole() & 2) == 2){
+            appointments.addAll(
+                    appointmentRepository.findAllByDoctorAndPatientNotNullAndStartTimeAfter(searchedUser.get(), LocalDateTime.now())
+            );
         }
-        if((user.getRole() & 1) == 1)
-            appointments.addAll(appointmentRepository
-                    .findAllByPatientAndStartTimeAfter(searchedUser.get(), LocalDateTime.now()));
-
         return appointments
                 .stream()
                 .map(AppointmentMapper::toAppointmentDto)
@@ -155,20 +134,18 @@ public class AppointmentController {
     private String patchAppointmentWithPatient(@PathVariable long appointment_id, @PathVariable String patient_login,
                                                        @CookieValue(name="token") String token){
         UserDetails user = jwtService.authorizationCookie(token);
-        Optional<UserDetails> optPatient = userDetailsRepository.findById(Long.parseLong(patient_login));
-        if(optPatient.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
-        UserDetails patient = optPatient.get();
-        System.out.println("Raz");
-        accessService.validateAccess(AccessService.Resource.APPOINTMENT_UPDATE,
-                user,
-                appointment_id);
-        System.out.println("Raz");
+        Optional<UserDetails> patient = userDetailsRepository.findById(Long.parseLong(patient_login));
+        if(patient.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
         Optional<Appointment> appointment = appointmentRepository.findById(appointment_id);
         if(appointment.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
-        if(user.getId() != patient.getId() && (user.getRole() & 4) == 0) //Zapis nie siebie i nie jako personel
+
+        //********************************************************8
+        accessService.validateAccess(AccessService.Resource.APPOINTMENT_UPDATE, user, appointment_id);
+
+        if(user.getId() != patient.get().getId() && (user.getRole() & 4) == 0) //Zapis nie siebie i nie jako personel
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized!\n");
-        System.out.println("Raz");
-        appointment.get().setPatient(patient);
+        //**** ZAPIS ***********************
+        appointment.get().setPatient(patient.get());
         appointmentRepository.save(appointment.get());
         return "Pomyślnie zapisano na wizytę #"+appointment.get().getId()+" "+appointment.get().getStartTime();
     }
