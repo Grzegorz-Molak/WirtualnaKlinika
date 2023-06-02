@@ -27,7 +27,7 @@ public class AccessService {
     }
 
     public enum Resource{
-        PROFILE, APPOINTMENT, APPOINTMENT_UPDATE, APPOINTMENT_RESIGN, APPOINTMENT_LIST, SIGN_UP;
+        PROFILE, APPOINTMENT, APPOINTMENT_UPDATE, APPOINTMENT_RESIGN, APPOINTMENT_HISTORY, APPOINTMENT_CALENDAR, SIGN_UP;
     }
 
     public void validateAccess(Resource resource, UserDetails user, long resource_id){
@@ -35,11 +35,9 @@ public class AccessService {
         switch(resource){
             case PROFILE -> validated = (user.getId() == resource_id);
             case APPOINTMENT ->  {
+                validated = false;
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
-                if(appointment.isEmpty()){
-                    validated = false;
-                    break;
-                }
+                if(appointment.isEmpty()) break;
                 if(appointment.get().getStartTime().isAfter(LocalDateTime.now())){
                     validated =
                             user.getId() == appointment.get().getPatient().getId() ||
@@ -51,84 +49,48 @@ public class AccessService {
                             user.getId() == appointment.get().getPatient().getId() ||
                                     user.getId() == appointment.get().getDoctor().getId();
                 }
+
             }
             case APPOINTMENT_UPDATE -> {
+                validated = false;
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
-                if(appointment.isEmpty() || ((user.getRole() & 2) == 2 && (user.getRole() & 1) == 0) ){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
-                    validated = false;
-                    break;
-                }
-                if(appointment.get().getPatient() != null){
-                    validated = false;
-                    break;
-                }
-                validated = true;
+                if(appointment.isEmpty()) break;
+                if(appointment.get().getPatient() != null) break;
+                if((user.getRole() & 1) == 1 || (user.getRole() & 4) == 4) validated = true;
+                //Sprawdzić czy pacjent chce zapisać siebie czy kogoś
             }
             case APPOINTMENT_RESIGN -> {
+                validated = false;
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
-                if(appointment.isEmpty() || ((user.getRole() & 2) == 2 && (user.getRole() & 1) == 0) ){ //Lekarz nie ma nic do gadania i nie ma takiej wizyty
-                    validated = false;
-                    break;
-                }
-                if(appointment.get().getPatient() == null)//Jeżeli na wizytę nikt nie był umówiony
-                    {
-                    validated = false;
-                    break;
-                }
-                if((user.getRole() & 4) == 4){ //Obsługa może
-                    validated = true;
-                    break;
-                }
-                if(appointment.get().getPatient().getId() != user.getId())
-                {  //Jeżeli próbujesz odwołać nie swoją wizytę
-                    validated = false;
-                    break;
-                }
-                validated = true;
+                if(appointment.isEmpty()) break;
+                if(appointment.get().getPatient() == null) break;
+                if((user.getRole() & 4) == 4) validated = true;
+                if(appointment.get().getPatient().getId() == user.getId()) validated = true;
             }
-            case APPOINTMENT_LIST -> { // user to zalogowany użytkownik resource to wizyty pewnego uzytkownika
+            case APPOINTMENT_HISTORY -> { // user to zalogowany użytkownik resource to wizyty pewnego uzytkownika
+                validated = false;
                 var resource_user =  userDetailsRepository.findById(resource_id);
-                if(resource_user.isEmpty()){
-                    validated = false;
-                    break;
-                }
-                if(user.getId() == resource_id){
-                    validated = true;
-                    break;
-                }
-                if((user.getRole() & 4) == 4){
-                    validated = true;
-                    break;
-                }
-                if((user.getRole() & 2) == 2){
-                    if((resource_user.get().getRole() & 2) == 2){
-                        validated = false;
-                        break;
-                    }
-                    else if((resource_user.get().getRole() & 1) == 1){
-                        validated = true;
-                        break;
-                    }
-                }
-                if((user.getRole() & 1) == 1){
-                    if(user.getId() != resource_id) {
-                        validated = false;
-                        break;
-                    }
-                }
-                validated = true;
+                if(resource_user.isEmpty()) break;
+                if(user.getId() == resource_id) validated = true;
+                if((user.getRole() & 2) == 2) validated = true;
+                // Zakładamy że lekarz może się dostać do historii wizyt pacjenta
+                // ale dostanie później tylko swoje wizyty
+            }
+            case APPOINTMENT_CALENDAR -> { // user to zalogowany użytkownik resource to wizyty pewnego uzytkownika
+                validated = false;
+                var resource_user =  userDetailsRepository.findById(resource_id);
+                if(resource_user.isEmpty()) break;
+                if(user.getId() == resource_id) validated = true;
+                if((user.getRole() & 4) == 4) validated = true;
+                // Lekarz nie musi widzieć przyszłych wizyt pacjenta, ale moze swoje, ale to załatwia warunek id
             }
             case SIGN_UP -> {  //resource_id to rola tworzonego użytkownika
                 validated = false;
                 if(((resource_id & 4) == 4 || (resource_id & 2) == 2) && //chcemy zrobić lekarza lub personel
-                ((user.getRole() & 8) == 8)){
-                   validated = true;
-                   break;
-                }
-                if((resource_id & 1) == 1 && (user.getRole() & 4) == 4){
-                    validated = true;
-                    break;
-                }
+                ((user.getRole() & 8) == 8)) validated = true; // tylko jako admin
+
+                if((resource_id & 1) == 1 && (user.getRole() & 4) == 4) validated = true;
+                //chcemy zrobić użytkownika jako personel pomocniczy
             }
             default -> validated = false;
         };
