@@ -121,6 +121,9 @@ public class UserServiceImpl implements UserService {
     public String changePassword(String profile, String oldPassword, String newPassword){
         User user = userRepository.findByLogin(profile);
 
+        if(newPassword.length()<12){
+            return "Za krótkie hasło";
+        }
         if(!passwordEncoder.validatePassword(oldPassword, user.getPassword())){
             return "Stare hasło jest niepoprawne";
         }
