@@ -56,6 +56,7 @@ public class AccessService {
                 Optional<Appointment> appointment = appointmentRepository.findById(resource_id);
                 if(appointment.isEmpty()) break;
                 if(appointment.get().getPatient() != null) break;
+                if(appointment.get().getStartTime().isBefore(LocalDateTime.now())) break;
                 if((user.getRole() & 1) == 1 || (user.getRole() & 4) == 4) validated = true;
                 //Sprawdzić czy pacjent chce zapisać siebie czy kogoś
             }
