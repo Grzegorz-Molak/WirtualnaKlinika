@@ -78,7 +78,7 @@ public class AppointmentController {
         );
         if((user.getRole() & 2) == 2){
             //1. Wyszukujemy swoje wizyty jako lekarz
-            if(user.getRole() == searchedUser.get().getId())
+            if(user.getId() == searchedUser.get().getId())
                 appointments.addAll( //Zbieramy wszystkie swoje wizyty przeszłe
                     appointmentRepository.findAllByDoctorAndPatientNotNullAndStartTimeBefore(user, LocalDateTime.now())
             );
@@ -162,10 +162,9 @@ public class AppointmentController {
         return "Pomyślnie zrezygnowano z wizyty";
     }
 
-
-    @GetMapping
-    public List<AppointmentDto> getAllAppointments() {
-        return appointmentService.findAll();
+    @GetMapping("/free")
+    private List<AppointmentDto> showFreeAppointments(){
+        return appointmentRepository.findAllByPatientNullAndStartTimeAfter(LocalDateTime.now()).stream().map(AppointmentMapper::toAppointmentDto).toList();
     }
 
 

@@ -59,8 +59,6 @@ public class UserController {
         return userService.logIn(userDto);
     }
 
-    //TODO Sprawdzanie tokenu
-    //Tylko zalogowany użytkownik może dostać swoje dane
     @GetMapping("/{profile}")
     private UserDetailsDto userDetailsByLogin(@PathVariable String profile,  @CookieValue(name="token") String token) {
         UserDetails user = jwtService.authorizationCookie(token);
@@ -105,28 +103,6 @@ public class UserController {
         headers.add(HttpHeaders.SET_COOKIE, "token=" + new_token + "; Path=/; Expires=" + expirationTimestamp + ";HttpOnly;Secure;");
         jwtService.invalidateToken(token);
         return ResponseEntity.ok().headers(headers).body("Zaktualizowano token, stary został unieważniony");
-    }
-
-
-    //TODO Usunąć poniższe z prdukcji!!! tylko do testowania
-    @GetMapping("")
-    private List<UserDto> allUsers() {
-        return userService.findAllUsers();
-    }
-
-    @GetMapping("/details")
-    private List<UserDetailsDto> allUserDetails() {
-        return userService.findAllDetails();
-    }
-
-    @GetMapping("/doctors")
-    private List<UserDetailsDto> allDoctorsDetails() {
-        return userService.findAllDoctors();
-    }
-
-    @GetMapping("accesses")
-    private String showAccesses(){
-        return Arrays.toString(AccessService.Resource.values());
     }
 
 

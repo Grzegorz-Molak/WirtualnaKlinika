@@ -17,4 +17,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment,Long> {
     List<Appointment> findAllByDoctorAndPatientNotNullAndStartTimeAfter(UserDetails doctor, LocalDateTime time);
     List<Appointment> findAllByPatientAndDoctorAndStartTimeBefore(UserDetails patient, UserDetails doctor, LocalDateTime time);
     List<Appointment> findAllByPatientAndDoctorAndStartTimeAfter(UserDetails patient, UserDetails doctor, LocalDateTime time);
+
+    List<Appointment> findAllByPatientNullAndStartTimeAfter(LocalDateTime time);
 }
